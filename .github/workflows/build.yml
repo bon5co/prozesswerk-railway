@@ -1,0 +1,32 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PROZESSWERK_REF: "0a6ea5a795ac7a59c62a5b8553f522cda6508d86"
+      IMAGE_TAG: "0.1.0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-args: PROZESSWERK_REF=${{ env.PROZESSWERK_REF }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/prozesswerk:${{ env.IMAGE_TAG }}
+            ghcr.io/${{ github.repository_owner }}/prozesswerk:latest
